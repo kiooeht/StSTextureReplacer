@@ -1,0 +1,11 @@
+{
+  "${ModID}:Config": {
+    "TEXT": [
+      "Dump all textures",
+      "Dumping textures...",
+      "DUMPING TEXTURES\nPLEASE WAIT...",
+      "Open texture packs directory",
+      "Refresh list"
+    ]
+  }
+}
