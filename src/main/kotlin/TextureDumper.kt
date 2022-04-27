@@ -106,13 +106,27 @@ class TextureDumper {
 
                 sb.begin()
                 try {
-                    sb.draw(
-                        region,
-                        region.offsetX,
-                        region.offsetY,
-                        region.packedWidth.toFloat(),
-                        region.packedHeight.toFloat()
-                    )
+                    if (region.rotate) {
+                        sb.draw(
+                            region,
+                            region.offsetX,
+                            region.offsetY,
+                            0f, 0f,
+                            region.rotatedPackedWidth,
+                            region.rotatedPackedHeight,
+                            1f, 1f,
+                            0f,
+                            true
+                        )
+                    } else {
+                        sb.draw(
+                            region,
+                            region.offsetX,
+                            region.offsetY,
+                            region.packedWidth.toFloat(),
+                            region.packedHeight.toFloat()
+                        )
+                    }
                 } finally {
                     sb.end()
                     sb.dispose()
