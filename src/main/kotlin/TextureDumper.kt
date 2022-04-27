@@ -87,6 +87,7 @@ class TextureDumper {
         // dump all regions
         val png = PixmapIO.PNG()
         atlas.regions.forEach { dumpAtlasRegion(path, it, outPath, png) }
+        glContext { atlas.dispose() }
         //println("  Dumped")
     }
 
