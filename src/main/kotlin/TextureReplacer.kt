@@ -2,23 +2,26 @@ package com.evacipated.cardcrawl.mod.texturereplacer
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
+import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.TextureData
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.glutils.FileTextureData
+import com.badlogic.gdx.graphics.glutils.PixmapTextureData
 import com.evacipated.cardcrawl.mod.texturereplacer.extensions.asAtlasRegion
 import com.evacipated.cardcrawl.mod.texturereplacer.patches.TextureAtlasLoad
 import com.evacipated.cardcrawl.modthespire.Loader
 import com.evacipated.cardcrawl.modthespire.lib.SpireConfig
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
-import java.nio.file.FileVisitOption
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
+import com.sun.nio.zipfs.ZipPath
+import java.io.File
+import java.net.URI
+import java.nio.file.*
 import java.util.*
 import kotlin.math.min
 import kotlin.streams.asSequence
+import kotlin.streams.toList
 
 object TextureReplacer {
     private val configFilename = SpireConfig.makeFilePath(TextureReplacerMod.ID, "pack_order", "json")
@@ -49,20 +52,58 @@ object TextureReplacer {
     private fun findPacks(): MutableList<TexPack> {
         val tmpPacks = mutableListOf<TexPack>()
 
+        val initPack = { pack: TexPack, filename: String ->
+            val path = Paths.get(filename)
+            var newPath = if (path.toFile().extension.toLowerCase() == "zip") {
+                val nameWithoutExtension = path.toFile().nameWithoutExtension
+                val uri = URI.create("jar:${path.toUri()}")
+                val fs = FileSystems.newFileSystem(uri, mapOf<String, Any>("encoding" to "UTF-8"))
+                val roots = Files.list(fs.getPath("/")).toList()
+                var ret = fs.getPath("/")
+                if (roots.size == 1 && roots[0].nameCount > 0) {
+                    val root = roots[0].getName(0).toString().replace("/", "").replace(File.separator, "")
+                    if (root == nameWithoutExtension) {
+                        ret = roots[0]
+                    }
+                }
+                ret.toString().trimEnd().let {
+                    if (it.endsWith("/")) {
+                        it.substring(0, it.length-1)
+                    } else {
+                        it
+                    }
+                }.let { fs.getPath(it) }
+            } else {
+                path
+            }
+            if (newPath.nameCount == 0) {
+                newPath = newPath.fileSystem.getPath("/");
+            }
+            Files.walk(newPath, FileVisitOption.FOLLOW_LINKS)
+                .asSequence()
+                .filter {
+                    try {
+                        it.toFile().isFile
+                    } catch (_: UnsupportedOperationException) {
+                        !it.toString().endsWith(it.fileSystem.separator) && it != newPath
+                    }
+                }
+                .forEach {
+                    var rel = newPath.relativize(it)
+                    rel = Paths.get(rel.toString())
+                    pack[rel] = it
+                }
+            tmpPacks.add(pack)
+        }
+
         // Local directory
         val texDir = TextureReplacerMod.getTexPackDir()
         texDir.list { _, name ->
             name != TextureReplacerMod.DUMP_DIRNAME
-        }.forEach { dir ->
+        }.filter { f -> f.isDirectory || f.name().endsWith(".zip", ignoreCase = true) }
+        .forEach { dir ->
             val pack = TexPack(dir.name())
-            Files.walk(Paths.get(dir.path()), FileVisitOption.FOLLOW_LINKS)
-                .asSequence()
-                .filter { it.toFile().isFile }
-                .forEach {
-                    val rel = Paths.get(dir.path()).relativize(it)
-                    pack[rel] = it
-                }
-            tmpPacks.add(pack)
+            initPack(pack, dir.path())
         }
 
         // Workshop
@@ -70,14 +111,7 @@ object TextureReplacer {
         infos.forEach { info ->
             if (info.hasTag("texture pack")) {
                 val pack = TexPack(info.id, info.title)
-                Files.walk(Paths.get(info.installPath), FileVisitOption.FOLLOW_LINKS)
-                    .asSequence()
-                    .filter { it.toFile().isFile }
-                    .forEach {
-                        val rel = Paths.get(info.installPath).relativize(it)
-                        pack[rel] = it
-                    }
-                tmpPacks.add(pack)
+                initPack(pack, info.installPath)
             }
         }
 
@@ -116,6 +150,9 @@ object TextureReplacer {
     internal fun addTexture(texture: Texture, data: TextureData) {
         if (data is FileTextureData) {
             val path = Paths.get(data.fileHandle.path()).toString()
+            managedTextures[path] = texture
+        } else if (data is ZipFileTextureData) {
+            val path = Paths.get(data.path).toString()
             managedTextures[path] = texture
         }
     }
@@ -200,12 +237,26 @@ object TextureReplacer {
         packs.filter { it.enabled }
             .forEach { pack ->
                 pack[p]?.let {
-                    val tex = Texture(Gdx.files.local(it.toString()))
-                    val ret = tex.asAtlasRegion()
-                    return ret
+                    return if (it is ZipPath) {
+                        val bytes = Files.readAllBytes(it)
+                        val tex = Texture(ZipFileTextureData(p, bytes))
+                        tex.asAtlasRegion()
+                    } else {
+                        val tex = Texture(Gdx.files.local(it.toString()))
+                        tex.asAtlasRegion()
+                    }
                 }
             }
         return null
+    }
+
+    class ZipFileTextureData(path: Path, bytes: ByteArray) : PixmapTextureData(
+        Pixmap(bytes, 0, bytes.size),
+        null,
+        false,
+        false
+    ) {
+        val path = path.toString()
     }
 
     class TexPack(val id: String, val name: String = id) {
