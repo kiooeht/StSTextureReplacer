@@ -13,12 +13,16 @@ object TextureAtlasLoad {
         method = "load"
     )
     object ReplaceRegions {
+        internal var disable = false
+
         @JvmStatic
         @SpireInsertPatch(
             locator = Locator::class,
             localvars = ["atlasRegion"]
         )
         fun Insert(__instance: TextureAtlas, data: TextureAtlas.TextureAtlasData, @ByRef atlasRegion: Array<TextureAtlas.AtlasRegion>) {
+            if (disable) return
+
             TextureReplacer.addOriginalRegion(atlasRegion[0], data)
 
             val region = TextureReplacer.getAtlasRegion(data, atlasRegion[0].name)
