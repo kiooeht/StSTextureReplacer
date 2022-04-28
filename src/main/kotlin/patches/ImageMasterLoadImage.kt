@@ -28,7 +28,8 @@ object ImageMasterLoadImage {
             override fun edit(e: NewExpr) {
                 if (e.className == Texture::class.qualifiedName) {
                     e.replace(
-                        "\$_ = new ${Texture::class.qualifiedName}(${ImageMasterLoadImage::class.qualifiedName}.getImgFile(\$1));"
+                        "\$_ = new ${Texture::class.qualifiedName}(${ImageMasterLoadImage::class.qualifiedName}.getImgFile(\$1));" +
+                                "${ImageMasterLoadImage::class.qualifiedName}.addOriginalTexture(\$_, \$1);"
                     )
                 }
             }
@@ -38,4 +39,10 @@ object ImageMasterLoadImage {
     @JvmStatic
     fun getImgFile(imgUrl: String): FileHandle =
         TextureReplacer.getImgFile(imgUrl)
+
+    @Suppress("unused")
+    @JvmStatic
+    fun addOriginalTexture(texture: Texture, imgUrl: String) {
+        TextureReplacer.addOriginalTexture(texture, imgUrl)
+    }
 }

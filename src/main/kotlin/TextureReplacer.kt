@@ -147,6 +147,11 @@ object TextureReplacer {
         saveConfig()
     }
 
+    internal fun addOriginalTexture(texture: Texture, imgUrl: String) {
+        val path = Paths.get(imgUrl).toString()
+        managedTextures[path] = texture
+    }
+
     internal fun addTexture(texture: Texture, data: TextureData) {
         if (data is FileTextureData) {
             val path = Paths.get(data.fileHandle.path()).toString()
