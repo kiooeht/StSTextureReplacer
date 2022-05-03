@@ -226,6 +226,7 @@ object TextureReplacer {
         packs.filter { it.enabled }
             .forEach { pack ->
                 pack[p]?.let {
+                    // TODO: zip files
                     return Gdx.files.local(it.toString())
                 }
             }
@@ -253,6 +254,18 @@ object TextureReplacer {
                 }
             }
         return null
+    }
+
+    fun getFileHanle(handle: FileHandle): FileHandle {
+        val p = handle.file().toPath()
+        packs.filter { it.enabled }
+            .forEach { pack ->
+                pack[p]?.let {
+                    // TODO: zip files
+                    return Gdx.files.local(it.toString())
+                }
+            }
+        return handle
     }
 
     class ZipFileTextureData(path: Path, bytes: ByteArray) : PixmapTextureData(
