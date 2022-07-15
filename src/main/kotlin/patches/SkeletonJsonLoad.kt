@@ -13,6 +13,6 @@ import com.evacipated.cardcrawl.modthespire.lib.SpirePatch2
 object SkeletonJsonLoad {
     @JvmStatic
     fun Prefix(@ByRef file: Array<FileHandle>) {
-        file[0] = TextureReplacer.getFileHanle(file[0])
+        file[0] = TextureReplacer.getFileHandle(file[0])
     }
 }

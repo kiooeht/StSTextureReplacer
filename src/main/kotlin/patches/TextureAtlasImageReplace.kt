@@ -15,7 +15,7 @@ object TextureAtlasImageReplace {
     object ReplaceAtlas {
         @JvmStatic
         fun Prefix(@ByRef packFile: Array<FileHandle>) {
-            packFile[0] = TextureReplacer.getFileHanle(packFile[0])
+            packFile[0] = TextureReplacer.getFileHandle(packFile[0])
         }
     }
 
@@ -26,7 +26,7 @@ object TextureAtlasImageReplace {
     object ReplaceImage {
         @JvmStatic
         fun Prefix (@ByRef handle: Array<FileHandle>) {
-            handle[0] = TextureReplacer.getFileHanle(handle[0])
+            handle[0] = TextureReplacer.getFileHandle(handle[0])
         }
     }
 }

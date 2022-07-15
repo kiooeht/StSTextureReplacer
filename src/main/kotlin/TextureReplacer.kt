@@ -256,7 +256,7 @@ object TextureReplacer {
         return null
     }
 
-    fun getFileHanle(handle: FileHandle): FileHandle {
+    fun getFileHandle(handle: FileHandle): FileHandle {
         val p = handle.file().toPath()
         packs.filter { it.enabled }
             .forEach { pack ->
