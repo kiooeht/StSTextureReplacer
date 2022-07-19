@@ -16,6 +16,7 @@ import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.sun.nio.zipfs.ZipPath
 import java.io.File
+import java.io.InputStream
 import java.net.URI
 import java.nio.file.*
 import java.util.*
@@ -226,8 +227,11 @@ object TextureReplacer {
         packs.filter { it.enabled }
             .forEach { pack ->
                 pack[p]?.let {
-                    // TODO: zip files
-                    return Gdx.files.local(it.toString())
+                    return if (it is ZipPath) {
+                        ZipFileHandle(it)
+                    } else {
+                        Gdx.files.local(it.toString())
+                    }
                 }
             }
         return Gdx.files.internal(imgUrl)
@@ -261,11 +265,63 @@ object TextureReplacer {
         packs.filter { it.enabled }
             .forEach { pack ->
                 pack[p]?.let {
-                    // TODO: zip files
-                    return Gdx.files.local(it.toString())
+                    return if (it is ZipPath) {
+                        ZipFileHandle(it)
+                    } else {
+                        Gdx.files.local(it.toString())
+                    }
                 }
             }
         return handle
+    }
+
+    class ZipFileHandle(private val path: ZipPath) : FileHandle() {
+        init {
+            type = com.badlogic.gdx.Files.FileType.Classpath
+        }
+
+        override fun path(): String {
+            return path.toString()
+        }
+
+        override fun name(): String {
+            return path.fileName.toString()
+        }
+
+        override fun extension(): String {
+            val name = name()
+            val dotIndex = name.lastIndexOf('.')
+            if (dotIndex == -1) {
+                return ""
+            }
+            return name.substring(dotIndex + 1)
+        }
+
+        override fun pathWithoutExtension(): String {
+            val path = path()
+            val dotIndex = path.lastIndexOf('.')
+            if (dotIndex == -1) {
+                return path
+            }
+            return path.substring(0, dotIndex)
+        }
+
+        override fun nameWithoutExtension(): String {
+            val name = name()
+            val dotIndex = name.lastIndexOf('.')
+            if (dotIndex == -1) {
+                return name
+            }
+            return name.substring(0, dotIndex)
+        }
+
+        override fun read(): InputStream {
+            return Files.newInputStream(path)
+        }
+
+        override fun toString(): String {
+            return path.toString()
+        }
     }
 
     class ZipFileTextureData(path: Path, bytes: ByteArray) : PixmapTextureData(
