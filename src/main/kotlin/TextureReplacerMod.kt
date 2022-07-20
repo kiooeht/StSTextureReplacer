@@ -123,7 +123,7 @@ class TextureReplacerMod :
 
         val settingsPanel = ModPanel()
 
-        val packList = TexPackToggleList(TextureReplacer.packs, 370f, 650f, 700f, 400f, settingsPanel)
+        val packList = TexPackToggleList(TextureReplacer.packs, 370f, 650f, 1175f, 400f, settingsPanel)
         settingsPanel.addUIElement(packList)
 
         var x1 = 360f
