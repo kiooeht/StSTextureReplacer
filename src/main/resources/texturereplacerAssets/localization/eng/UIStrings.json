@@ -5,7 +5,8 @@
       "Dumping textures...",
       "DUMPING TEXTURES\nPLEASE WAIT...",
       "Open texture packs directory",
-      "Refresh list"
+      "Refresh list",
+      "This process can take a few minutes and requires about 125 MB of disk space."
     ]
   }
 }

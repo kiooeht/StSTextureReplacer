@@ -4,15 +4,19 @@ import basemod.*
 import basemod.interfaces.EditStringsSubscriber
 import basemod.interfaces.PostInitializeSubscriber
 import basemod.interfaces.PostRenderSubscriber
+import basemod.patches.com.megacrit.cardcrawl.helpers.TipHelper.HeaderlessTip
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.evacipated.cardcrawl.mod.texturereplacer.extensions.scale
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer
 import com.megacrit.cardcrawl.core.CardCrawlGame
 import com.megacrit.cardcrawl.core.Settings
 import com.megacrit.cardcrawl.helpers.FontHelper
+import com.megacrit.cardcrawl.helpers.Hitbox
 import com.megacrit.cardcrawl.helpers.ImageMaster
+import com.megacrit.cardcrawl.helpers.input.InputHelper
 import com.megacrit.cardcrawl.localization.UIStrings
 import com.megacrit.cardcrawl.screens.mainMenu.MenuCancelButton
 import java.awt.Desktop
@@ -149,7 +153,7 @@ class TextureReplacerMod :
         }
 
         x1 += w1 / Settings.scale + 20f
-        val dumpButton = ModLabeledButton(strings.TEXT[0], x1, 700f, settingsPanel) {
+        val dumpButton = object : ModLabeledButton(strings.TEXT[0], x1, 700f, settingsPanel, {
             dumpInProgress = true
             it.parent
             hideCancelButton(it.parent)
@@ -159,6 +163,17 @@ class TextureReplacerMod :
                 currentDump.set("")
                 showCancelButton(it.parent)
                 dumpInProgress = false
+            }
+        }) {
+            override fun update() {
+                super.update()
+                if (ReflectionHacks.getPrivate<Hitbox>(this, ModLabeledButton::class.java, "hb").hovered) {
+                    HeaderlessTip.renderHeaderlessTip(
+                        InputHelper.mX + 60.scale(),
+                        InputHelper.mY - 50.scale(),
+                        strings.TEXT[5]
+                    )
+                }
             }
         }
         settingsPanel.addUIElement(dumpButton)
