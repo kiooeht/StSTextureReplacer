@@ -234,7 +234,7 @@ object TextureReplacer {
                     return if (it is ZipPath) {
                         ZipFileHandle(it)
                     } else {
-                        Gdx.files.local(it.toString())
+                        Gdx.files.absolute(it.toString())
                     }
                 }
             }
@@ -256,7 +256,7 @@ object TextureReplacer {
                         val tex = Texture(ZipFileTextureData(p, bytes))
                         tex.asAtlasRegion()
                     } else {
-                        val tex = Texture(Gdx.files.local(it.toString()))
+                        val tex = Texture(Gdx.files.absolute(it.toString()))
                         tex.asAtlasRegion()
                     }
                 }
@@ -272,7 +272,7 @@ object TextureReplacer {
                     return if (it is ZipPath) {
                         ZipFileHandle(it)
                     } else {
-                        Gdx.files.local(it.toString())
+                        Gdx.files.absolute(it.toString())
                     }
                 }
             }
