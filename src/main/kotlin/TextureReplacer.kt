@@ -58,7 +58,11 @@ object TextureReplacer {
             var newPath = if (path.toFile().extension.toLowerCase() == "zip") {
                 val nameWithoutExtension = path.toFile().nameWithoutExtension
                 val uri = URI.create("jar:${path.toUri()}")
-                val fs = FileSystems.newFileSystem(uri, mapOf<String, Any>("encoding" to "UTF-8"))
+                val fs = try {
+                    FileSystems.newFileSystem(uri, mapOf<String, Any>("encoding" to "UTF-8"))
+                } catch (e: FileSystemAlreadyExistsException) {
+                    FileSystems.getFileSystem(uri)
+                }
                 val roots = Files.list(fs.getPath("/")).toList()
                 var ret = fs.getPath("/")
                 if (roots.size == 1 && roots[0].nameCount > 0) {
