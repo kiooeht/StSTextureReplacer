@@ -50,6 +50,28 @@ object TextureReplacer {
         saveConfig()
     }
 
+    fun refresh() {
+        val tmpPacks = findPacks()
+
+        // Remove packs that don't exist anymore
+        packs.removeIf {
+            if (tmpPacks.none { pack -> pack.id == it.id }) {
+                it.enabled = false
+                true
+            } else {
+                false
+            }
+        }
+
+        // Add new packs
+        tmpPacks.removeIf {
+            packs.any { pack -> pack.id == it.id }
+        }
+        packs.addAll(tmpPacks)
+
+        saveConfig()
+    }
+
     private fun findPacks(): MutableList<TexPack> {
         val tmpPacks = mutableListOf<TexPack>()
 

@@ -134,7 +134,7 @@ class TextureReplacerMod :
         var w1 = 0f
 
         val refreshButton = ModLabeledButton(strings.TEXT[4], x1, 700f, settingsPanel) {
-            TextureReplacer.initialize()
+            TextureReplacer.refresh()
             packList.load(TextureReplacer.packs)
         }
         settingsPanel.addUIElement(refreshButton)
