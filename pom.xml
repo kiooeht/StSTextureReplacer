@@ -7,12 +7,12 @@
     <name>Texture Replacer</name>
     <groupId>com.evacipated.cardcrawl.mod</groupId>
     <artifactId>texturereplacer</artifactId>
-    <version>0.1</version>
+    <version>1.0</version>
 
     <properties>
         <ModID>texturereplacer</ModID>
         <jarName>TextureReplacer</jarName>
-        <SlayTheSpire.version>12-22-2020</SlayTheSpire.version>
+        <SlayTheSpire.version>12-18-2022</SlayTheSpire.version>
         <ModTheSpire.version>3.24.0</ModTheSpire.version>
 
         <kotlin.version>1.4.10</kotlin.version>
