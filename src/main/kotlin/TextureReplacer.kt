@@ -1,3 +1,5 @@
+@file:JvmName("TextureReplacer")
+
 package com.evacipated.cardcrawl.mod.texturereplacer
 
 import com.badlogic.gdx.Gdx
@@ -31,9 +33,36 @@ object TextureReplacer {
     private val managedRegions: MutableMap<String, TextureAtlas.AtlasRegion> = mutableMapOf()
     private val originalRegions: MutableMap<String, TextureAtlas.AtlasRegion> = mutableMapOf()
 
-    val packs = mutableListOf<TexPack>()
+    internal val packs = mutableListOf<TexPack>()
 
-    fun initialize() {
+    // public API
+    @JvmStatic
+    fun isPackEnabled(id: String): Boolean =
+        packs.firstOrNull { it.id == id }?.enabled ?: false
+
+    @JvmStatic
+    fun isPackEnabled(workshopID: Long): Boolean =
+        isPackEnabled(workshopID.toString(16))
+
+    @JvmStatic
+    fun isReplaced(texture: Texture): Boolean {
+        val data = texture.textureData
+        if (data is ZipFileTextureData) {
+            return true
+        }
+        if (data is FileTextureData) {
+            return data.fileHandle.type() != com.badlogic.gdx.Files.FileType.Internal &&
+                    data.fileHandle.type() != com.badlogic.gdx.Files.FileType.Classpath
+        }
+        return false
+    }
+
+    @JvmStatic
+    fun isReplaced(region: TextureAtlas.AtlasRegion): Boolean =
+        isReplaced(region.texture)
+    // public API end
+
+    internal fun initialize() {
         val tmpPacks = findPacks()
 
         packs.clear()
@@ -50,7 +79,7 @@ object TextureReplacer {
         saveConfig()
     }
 
-    fun refresh() {
+    internal fun refresh() {
         val tmpPacks = findPacks()
 
         // Remove packs that don't exist anymore
@@ -248,7 +277,7 @@ object TextureReplacer {
         }
     }
 
-    fun getImgFile(imgUrl: String): FileHandle {
+    internal fun getImgFile(imgUrl: String): FileHandle {
         val p = Paths.get(imgUrl)
         packs.filter { it.enabled }
             .forEach { pack ->
@@ -263,7 +292,7 @@ object TextureReplacer {
         return Gdx.files.internal(imgUrl)
     }
 
-    fun getAtlasRegion(data: TextureAtlas.TextureAtlasData, name: String): TextureAtlas.AtlasRegion? {
+    internal fun getAtlasRegion(data: TextureAtlas.TextureAtlasData, name: String): TextureAtlas.AtlasRegion? {
         val filename = TextureAtlasLoad.DataField.filename.get(data)
         val p = Paths.get(filename, "${name}.png")
         return getAtlasRegion(p)
@@ -286,7 +315,7 @@ object TextureReplacer {
         return null
     }
 
-    fun getFileHandle(handle: FileHandle): FileHandle {
+    internal fun getFileHandle(handle: FileHandle): FileHandle {
         val p = handle.file().toPath()
         packs.filter { it.enabled }
             .forEach { pack ->
@@ -301,7 +330,7 @@ object TextureReplacer {
         return handle
     }
 
-    class ZipFileHandle(private val path: ZipPath) : FileHandle() {
+    internal class ZipFileHandle(private val path: ZipPath) : FileHandle() {
         init {
             type = com.badlogic.gdx.Files.FileType.Classpath
         }
@@ -350,7 +379,7 @@ object TextureReplacer {
         }
     }
 
-    class ZipFileTextureData(path: Path, bytes: ByteArray) : PixmapTextureData(
+    internal class ZipFileTextureData(path: Path, bytes: ByteArray) : PixmapTextureData(
         Pixmap(bytes, 0, bytes.size),
         null,
         false,
