@@ -7,7 +7,7 @@
     <name>Texture Replacer</name>
     <groupId>com.evacipated.cardcrawl.mod</groupId>
     <artifactId>texturereplacer</artifactId>
-    <version>1.0</version>
+    <version>1.1</version>
 
     <properties>
         <ModID>texturereplacer</ModID>
