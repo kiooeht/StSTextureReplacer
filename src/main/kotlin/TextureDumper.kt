@@ -47,8 +47,7 @@ class TextureDumper {
                     .partition(atlas::matches)
 
                 atlases.forEach(::dumpAtlas)
-                imgs.filter { !atlasTextureBlackList.contains(it) }
-                    .forEach(::dumpTexture)
+                imgs.forEach(::dumpTexture)
             }
 
             Gdx.app.postRunnable { finished() }
@@ -82,6 +81,7 @@ class TextureDumper {
         }
         // blacklist all the atlas textures,
         // so they don't get dumped by the texture dumper
+        // Note: blacklist now does nothing, all textures are dumped
         atlas.textures.forEach {
             val data = it.textureData as? FileTextureData
             if (data != null) {
