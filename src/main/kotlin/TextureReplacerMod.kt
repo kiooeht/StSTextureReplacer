@@ -81,9 +81,16 @@ class TextureReplacerMod :
             isAccessible = true
             get(null)
         }
-        button = modsScreen.javaClass.getDeclaredField("button").run {
-            isAccessible = true
-            get(modsScreen) as? MenuCancelButton
+        val getCancelButton: Class<*>.(String) -> MenuCancelButton? = { fieldName: String ->
+            getDeclaredField(fieldName).run {
+                isAccessible = true
+                get(modsScreen) as? MenuCancelButton
+            }
+        }
+        button = try {
+            modsScreen.javaClass.getCancelButton("closeButton")
+        } catch (ignore: NoSuchFieldException) {
+            modsScreen.javaClass.getCancelButton("button")
         }
         button?.hideInstantly()
 
