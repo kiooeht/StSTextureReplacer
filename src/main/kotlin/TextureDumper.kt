@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.glutils.FileTextureData
 import com.badlogic.gdx.graphics.glutils.FrameBuffer
 import com.badlogic.gdx.math.Matrix4
 import com.badlogic.gdx.utils.ScreenUtils
+import com.evacipated.cardcrawl.mod.texturereplacer.patches.TextureAtlasImageReplace
 import com.evacipated.cardcrawl.mod.texturereplacer.patches.TextureAtlasLoad
 import com.evacipated.cardcrawl.modthespire.Loader
 import java.nio.file.FileSystems
@@ -75,9 +76,13 @@ class TextureDumper {
 
         val atlas = glContext {
             // disable texture replacing so dump uses default textures
+            TextureAtlasImageReplace.disable = true
             TextureAtlasLoad.ReplaceRegions.disable = true
             TextureAtlas(path.toString().substring(1))
-                .also { TextureAtlasLoad.ReplaceRegions.disable = false }
+                .also {
+                    TextureAtlasImageReplace.disable = false
+                    TextureAtlasLoad.ReplaceRegions.disable = false
+                }
         }
         // blacklist all the atlas textures,
         // so they don't get dumped by the texture dumper
