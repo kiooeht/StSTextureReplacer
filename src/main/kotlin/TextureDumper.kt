@@ -1,7 +1,6 @@
 package com.evacipated.cardcrawl.mod.texturereplacer
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.PixmapIO
@@ -14,12 +13,14 @@ import com.badlogic.gdx.utils.ScreenUtils
 import com.evacipated.cardcrawl.mod.texturereplacer.patches.TextureAtlasImageReplace
 import com.evacipated.cardcrawl.mod.texturereplacer.patches.TextureAtlasLoad
 import com.evacipated.cardcrawl.modthespire.Loader
+import java.io.File
 import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
+import kotlin.io.path.exists
 import kotlin.streams.asSequence
 
 class TextureDumper {
@@ -37,6 +38,15 @@ class TextureDumper {
 
     fun dumpAllTextures(finished: () -> Unit) {
         Thread {
+            // Delete existing dump
+            val dumpPath = Paths.get(TextureReplacerMod.TEXPACKS_PATH, TextureReplacerMod.DUMP_DIRNAME)
+            if (dumpPath.exists()) {
+                Files.walk(dumpPath).use {
+                    it.sorted(Comparator.reverseOrder())
+                        .map(Path::toFile)
+                        .forEach(File::delete)
+                }
+            }
             //println("Dumping all textures to file...")
             val fs = FileSystems.newFileSystem(Paths.get(Loader.STS_JAR), null)
             fs.rootDirectories.forEach { root ->
